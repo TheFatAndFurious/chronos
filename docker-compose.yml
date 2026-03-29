@@ -1,0 +1,29 @@
+# docker-compose.yml
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: chronos
+      POSTGRES_PASSWORD: chronos
+      POSTGRES_DB: chronos
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  postgres-test:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: chronos
+      POSTGRES_PASSWORD: chronos
+      POSTGRES_DB: chronos_test
+    ports:
+      - "5433:5432"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+
+volumes:
+  postgres_data:
