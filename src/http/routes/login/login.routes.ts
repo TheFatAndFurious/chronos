@@ -1,12 +1,12 @@
 import jwt from "@elysiajs/jwt";
 import Elysia, { t, validationDetail } from "elysia";
-import { userRepository } from "../../../infrastructure/persistence/schemas/users/repository";
+import { userRepository } from "../../../infrastructure/persistence";
 
 export const loginRoutes = new Elysia({ prefix: "auth" })
   .use(
     jwt({
       name: "jwt",
-      secret: "insanely-secure-secret",
+      secret: process.env.JWT_SECRET || "",
     }),
   )
   .post(

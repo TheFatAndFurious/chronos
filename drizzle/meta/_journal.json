@@ -8,6 +8,13 @@
       "when": 1774810396525,
       "tag": "0000_bumpy_kulan_gath",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1774902368727,
+      "tag": "0001_marvelous_iron_lad",
+      "breakpoints": true
     }
   ]
 }

@@ -1,31 +1,20 @@
 import Elysia, { t, validationDetail } from "elysia";
-import { userRepository } from "../../../infrastructure/persistence/schemas/users/repository";
+import { registerUserHandler } from "../../../application/commands/register-user.handler";
+import { EmailAlreadyExistsError } from "../../../domain/exceptions/domain.exceptions";
 
 export const authRoutes = new Elysia({ prefix: "/auth" }).post(
   "/register",
   async ({ body, set }) => {
-    // check if email already exists in the DB
-    const existing = await userRepository.findByEmail(body.email);
-
-    if (existing) {
-      set.status = 409;
-      return { error: "Email already registered" };
+    try {
+      const result = await registerUserHandler(body);
+      set.status = 201;
+      return result;
+    } catch (error) {
+      if (error instanceof EmailAlreadyExistsError) {
+        set.status = 409;
+        return { error: "Email already registered" };
+      }
     }
-
-    const hashedPassword = await Bun.password.hash(body.password, "argon2id");
-
-    const user = await userRepository.create({
-      email: body.email,
-      name: body.name,
-      passwordHash: hashedPassword,
-    });
-
-    set.status = 201;
-    return {
-      userId: user.id,
-      email: user.email,
-      name: user.name,
-    };
   },
   {
     body: t.Object({
@@ -38,3 +27,4 @@ export const authRoutes = new Elysia({ prefix: "/auth" }).post(
     }),
   },
 );
+// .post("/refresh-tokens", async ({ body, set }) => {});

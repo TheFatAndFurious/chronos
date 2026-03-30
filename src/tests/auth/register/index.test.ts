@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from "bun:test";
 import { app } from "../../../app";
 import { cleanupDatabase } from "../../setup";
 
-const TEST_NAME = "GOLDORAK";
+const TEST_NAME = "BABAKAR";
 const TEST_EMAIL = "therealslimshady@gmail.com";
 const TEST_PASSWORD = "notSoSecureHuh";
 const TEST_INVALID_EMAIL = "babakar#gmail.com";
