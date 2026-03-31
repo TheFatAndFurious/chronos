@@ -14,6 +14,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" }).post(
         set.status = 409;
         return { error: "Email already registered" };
       }
+      throw error;
     }
   },
   {

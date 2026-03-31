@@ -1,7 +1,6 @@
-import { db } from "../../../db";
-
 import { eq } from "drizzle-orm";
-import { User, users } from "../../users";
+import { db } from "../db";
+import { User, users } from "../schemas/users";
 
 export const userRepository = {
   async findByEmail(email: string): Promise<User | null> {

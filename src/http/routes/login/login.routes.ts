@@ -1,6 +1,6 @@
 import jwt from "@elysiajs/jwt";
 import Elysia, { t, validationDetail } from "elysia";
-import { userRepository } from "../../../infrastructure/persistence";
+import { userRepository } from "../../../infrastructure/persistence/repository/user.repository";
 
 export const loginRoutes = new Elysia({ prefix: "auth" })
   .use(

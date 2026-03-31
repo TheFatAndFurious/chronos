@@ -1,5 +1,5 @@
 import { EmailAlreadyExistsError } from "../../domain/exceptions/domain.exceptions";
-import { userRepository } from "../../infrastructure/persistence";
+import { userRepository } from "../../infrastructure/persistence/repository/user.repository";
 import { User } from "../../infrastructure/persistence/schemas/users";
 
 export type RegisterUserCommand = {
