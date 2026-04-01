@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
@@ -12,3 +13,12 @@ if (!databaseUrl) {
 const client = postgres(databaseUrl);
 
 export const db = drizzle(client);
+
+export async function checkDatabaseConnection(): Promise<void> {
+  try {
+    await db.execute(sql`SELECT 1`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    throw new Error(`Database connection failed: ${message}`);
+  }
+}

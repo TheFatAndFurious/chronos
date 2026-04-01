@@ -40,7 +40,8 @@ describe("POST /auth/login", () => {
 
     expect(response.status).toBe(200);
     const body = await response.json();
-    expect(body.token).toBeDefined();
+    expect(body.accessToken).toBeDefined();
+    expect(body.refreshToken).toBeDefined();
   });
 
   it("should return 401 for non-existent user", async () => {

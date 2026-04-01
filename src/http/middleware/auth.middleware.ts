@@ -1,8 +1,9 @@
 import jwt from "@elysiajs/jwt";
 import Elysia from "elysia";
+import { jwtConfig } from "../../infrastructure/auth/jwt.service";
 
 export const authMiddleware = new Elysia({ name: "auth-middleware" })
-  .use(jwt({ name: "jwt", secret: process.env.JWT_SECRET || "" }))
+  .use(jwt({ name: "jwt", ...jwtConfig }))
   .derive({ as: "scoped" }, async ({ jwt, headers, set }) => {
     const auth = headers.authorization;
     if (!auth?.startsWith("Bearer ")) {

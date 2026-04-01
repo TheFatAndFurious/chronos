@@ -1,45 +1,31 @@
-import jwt from "@elysiajs/jwt";
+import { jwt } from "@elysiajs/jwt";
 import Elysia, { t, validationDetail } from "elysia";
-import { userRepository } from "../../../infrastructure/persistence/repository/user.repository";
+import {
+  InvalidCredentialsError,
+  loginHandler,
+} from "../../../application/commands/login.handler";
+import { jwtConfig } from "../../../infrastructure/auth/jwt.service";
 
-export const loginRoutes = new Elysia({ prefix: "auth" })
-  .use(
-    jwt({
-      name: "jwt",
-      secret: process.env.JWT_SECRET || "",
-    }),
-  )
+export const loginRoutes = new Elysia({ prefix: "/auth" })
+  .use(jwt({ name: "jwt", ...jwtConfig }))
   .post(
-    "login",
+    "/login",
     async ({ body, set, jwt }) => {
-      console.debug("Attempting to login user...");
-      const existing = await userRepository.findByEmail(body.email);
+      try {
+        const result = await loginHandler(body);
+        const accessToken = await jwt.sign({ userId: result.userId });
 
-      if (!existing) {
-        set.status = 401;
-        console.error("Login attempt with non-existent email:", body.email);
-        return { error: "Invalid credentials" };
+        return {
+          accessToken,
+          refreshToken: result.refreshToken,
+        };
+      } catch (error) {
+        if (error instanceof InvalidCredentialsError) {
+          set.status = 401;
+          return { error: "Invalid credentials" };
+        }
+        throw error;
       }
-      console.debug("User found, verifying password...");
-
-      const validPassword = await Bun.password.verify(
-        body.password,
-        existing.passwordHash,
-        "argon2id",
-      );
-
-      if (!validPassword) {
-        set.status = 401;
-        console.error("Invalid password attempt for user:", body.email);
-        return { error: "Invalid credentials" };
-      }
-
-      console.debug("User authenticated, generating token...");
-
-      const token = await jwt.sign({ id: existing.id });
-
-      console.debug("Token generated successfully for user:", body.email);
-      return { token };
     },
     {
       body: t.Object({
