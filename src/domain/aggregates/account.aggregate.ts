@@ -1,9 +1,18 @@
-import type { DomainEvent, AccountCreated } from "../events/domain-events";
+import type {
+  DomainEvent,
+  AccountCreated,
+  MoneyDeposited,
+  MoneyWithdrawn,
+} from "../events/domain-events";
+import {
+  InsufficientFundsError,
+  InvalidAmountError,
+} from "../exceptions/domain.exceptions";
 
 export class Account {
   private _id: string;
   private _userId: string;
-  private _ownerName: string;
+  private _accountName: string;
   private _balance: number;
   private _version: number;
   private _uncommittedEvents: DomainEvent[];
@@ -11,7 +20,7 @@ export class Account {
   private constructor() {
     this._id = "";
     this._userId = "";
-    this._ownerName = "";
+    this._accountName = "";
     this._balance = 0;
     this._version = 0;
     this._uncommittedEvents = [];
@@ -25,8 +34,8 @@ export class Account {
     return this._userId;
   }
 
-  get ownerName(): string {
-    return this._ownerName;
+  get accountName(): string {
+    return this._accountName;
   }
 
   get balance(): number {
@@ -45,13 +54,13 @@ export class Account {
     this._uncommittedEvents = [];
   }
 
-  static create(id: string, userId: string, ownerName: string): Account {
+  static create(id: string, userId: string, accountName: string): Account {
     const account = new Account();
     account._id = id;
 
     const event: AccountCreated = {
       type: "AccountCreated",
-      payload: { userId, ownerName },
+      payload: { userId, accountName },
     };
 
     account.apply(event);
@@ -72,11 +81,43 @@ export class Account {
     return account;
   }
 
+  deposit(amount: number, transactionId: string): void {
+    if (amount <= 0 || !Number.isInteger(amount)) {
+      throw new InvalidAmountError(amount);
+    }
+
+    const event: MoneyDeposited = {
+      type: "MoneyDeposited",
+      payload: { amount, transactionId },
+    };
+
+    this.apply(event);
+    this._uncommittedEvents.push(event);
+  }
+
+  withdraw(amount: number, transactionId: string): void {
+    if (amount <= 0 || !Number.isInteger(amount)) {
+      throw new InvalidAmountError(amount);
+    }
+
+    if (amount > this._balance) {
+      throw new InsufficientFundsError(this._id, amount, this._balance);
+    }
+
+    const event: MoneyWithdrawn = {
+      type: "MoneyWithdrawn",
+      payload: { amount, transactionId },
+    };
+
+    this.apply(event);
+    this._uncommittedEvents.push(event);
+  }
+
   private apply(event: DomainEvent): void {
     switch (event.type) {
       case "AccountCreated":
         this._userId = event.payload.userId;
-        this._ownerName = event.payload.ownerName;
+        this._accountName = event.payload.accountName;
         this._balance = 0;
         break;
       case "MoneyDeposited":

@@ -1,6 +1,6 @@
 export type AccountCreated = {
   type: "AccountCreated";
-  payload: { userId: string; ownerName: string };
+  payload: { userId: string; accountName: string };
 };
 
 export type MoneyDeposited = {

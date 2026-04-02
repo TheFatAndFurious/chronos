@@ -25,3 +25,28 @@ export class UnknownRefreshTokenError extends Error {
     this.name = "UnknownRefreshTokenError";
   }
 }
+
+export class InsufficientFundsError extends Error {
+  constructor(accountId: string, requested: number, available: number) {
+    super(
+      `Insufficient funds on account ${accountId}: requested ${requested}, available ${available}`,
+    );
+    this.name = "InsufficientFundsError";
+  }
+}
+
+export class InvalidAmountError extends Error {
+  constructor(amount: number) {
+    super(`Invalid amount: ${amount}. Amount must be a positive integer.`);
+    this.name = "InvalidAmountError";
+  }
+}
+
+export class OptimisticLockError extends Error {
+  constructor(aggregateId: string, expectedVersion: number) {
+    super(
+      `Optimistic lock failed for aggregate ${aggregateId} at version ${expectedVersion}`,
+    );
+    this.name = "OptimisticLockError";
+  }
+}
