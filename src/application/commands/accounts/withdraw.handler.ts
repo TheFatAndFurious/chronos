@@ -3,20 +3,21 @@ import { AccountNotOwnedError } from "@domain/exceptions/domain.exceptions";
 import { eventStore } from "@infrastructure/persistence/event-store";
 import { randomUUID } from "node:crypto";
 
-export type DepositCommand = {
+export type WithdrawCommand = {
   accountId: string;
-  amountToDeposit: number;
+  amountToWithdraw: number;
   userId: string;
 };
 
-export type DepositResult = {
+export type WithdrawResult = {
   transactionId: string;
 };
 
-export const depositHandler = async (
-  command: DepositCommand,
-): Promise<DepositResult> => {
-  const { accountId, amountToDeposit, userId } = command;
+export const withdrawHandler = async (
+  command: WithdrawCommand,
+): Promise<WithdrawResult> => {
+  const { accountId, amountToWithdraw, userId } = command;
+
   const events = await eventStore.loadEvents(accountId);
 
   const rehydratedAccount = Account.rehydrate(accountId, events);
@@ -27,7 +28,7 @@ export const depositHandler = async (
 
   const transactionId = randomUUID();
 
-  rehydratedAccount.deposit(amountToDeposit, transactionId);
+  rehydratedAccount.withdraw(amountToWithdraw, transactionId);
 
   eventStore.append(
     rehydratedAccount.id,
