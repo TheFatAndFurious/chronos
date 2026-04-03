@@ -50,3 +50,10 @@ export class OptimisticLockError extends Error {
     this.name = "OptimisticLockError";
   }
 }
+
+export class AccountNotOwnedError extends Error {
+  constructor(accountId: string, userId: string) {
+    super(`Account ${accountId} is not owned by user ${userId}`);
+    this.name = "AccountNotOwnedError";
+  }
+}

@@ -1,6 +1,6 @@
 import type {
-  DomainEvent,
   AccountCreated,
+  DomainEvent,
   MoneyDeposited,
   MoneyWithdrawn,
 } from "../events/domain-events";
@@ -36,10 +36,6 @@ export class Account {
 
   get accountName(): string {
     return this._accountName;
-  }
-
-  get balance(): number {
-    return this._balance;
   }
 
   get version(): number {

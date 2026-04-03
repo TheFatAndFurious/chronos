@@ -1,6 +1,6 @@
-import { InvalidRefreshTokenError } from "../../domain/exceptions/domain.exceptions";
-import { jwtService } from "../../infrastructure/auth/jwt.service";
-import { tokenRepository } from "../../infrastructure/persistence/repository/token.repository";
+import { InvalidRefreshTokenError } from "@domain/exceptions/domain.exceptions";
+import { jwtService } from "@infrastructure/auth/jwt.service";
+import { tokenRepository } from "@infrastructure/persistence/repository/token.repository";
 
 export type RefreshTokenCommand = {
   refreshToken: string;
@@ -12,7 +12,7 @@ export type RefreshTokenResult = {
 };
 
 export async function refreshTokenHandler(
-  command: RefreshTokenCommand
+  command: RefreshTokenCommand,
 ): Promise<RefreshTokenResult> {
   const { refreshToken } = command;
 

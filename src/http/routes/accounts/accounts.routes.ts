@@ -1,6 +1,7 @@
+import { getAccountByIdHandler } from "@application/queries/get-account.handler";
 import Elysia, { t } from "elysia";
+import { createAccountHandler } from "../../../application/commands/accounts/create-account.handler";
 import { authMiddleware } from "../../middleware/auth.middleware";
-import { createAccountHandler } from "../../../application/commands/create-account.handler";
 
 export const accountsRoutes = new Elysia({ prefix: "/accounts" })
   .use(authMiddleware)
@@ -20,7 +21,10 @@ export const accountsRoutes = new Elysia({ prefix: "/accounts" })
         accountName: t.String({ minLength: 1 }),
       }),
     },
-  ).get(
-    "/:id", 
-    async {{ }}
   )
+  .get("/:id", async ({ params, set }) => {
+    const result = await getAccountByIdHandler({ accountId: params.id });
+
+    set.status = 200;
+    return result;
+  });

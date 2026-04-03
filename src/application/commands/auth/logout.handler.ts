@@ -1,6 +1,6 @@
-import { UnknownRefreshTokenError } from "../../domain/exceptions/domain.exceptions";
-import { jwtService } from "../../infrastructure/auth/jwt.service";
-import { tokenRepository } from "../../infrastructure/persistence/repository/token.repository";
+import { UnknownRefreshTokenError } from "@domain/exceptions/domain.exceptions";
+import { jwtService } from "@infrastructure/auth/jwt.service";
+import { tokenRepository } from "@infrastructure/persistence/repository/token.repository";
 
 export type LogoutCommand = {
   refreshToken: string;

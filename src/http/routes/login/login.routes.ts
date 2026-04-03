@@ -1,10 +1,8 @@
+import { loginHandler } from "@application/commands/auth/login.handler";
+import { InvalidCredentialsError } from "@domain/exceptions/domain.exceptions";
 import { jwt } from "@elysiajs/jwt";
+import { jwtConfig } from "@infrastructure/auth/jwt.service";
 import Elysia, { t, validationDetail } from "elysia";
-import {
-  InvalidCredentialsError,
-  loginHandler,
-} from "../../../application/commands/login.handler";
-import { jwtConfig } from "../../../infrastructure/auth/jwt.service";
 
 export const loginRoutes = new Elysia({ prefix: "/auth" })
   .use(jwt({ name: "jwt", ...jwtConfig }))

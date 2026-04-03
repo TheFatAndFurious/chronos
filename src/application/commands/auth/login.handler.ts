@@ -1,7 +1,7 @@
-import { InvalidCredentialsError } from "../../domain/exceptions/domain.exceptions";
-import { jwtService } from "../../infrastructure/auth/jwt.service";
-import { tokenRepository } from "../../infrastructure/persistence/repository/token.repository";
-import { userRepository } from "../../infrastructure/persistence/repository/user.repository";
+import { InvalidCredentialsError } from "@domain/exceptions/domain.exceptions";
+import { jwtService } from "@infrastructure/auth/jwt.service";
+import { tokenRepository } from "@infrastructure/persistence/repository/token.repository";
+import { userRepository } from "@infrastructure/persistence/repository/user.repository";
 
 export type LoginCommand = {
   email: string;
