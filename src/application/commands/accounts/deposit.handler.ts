@@ -21,18 +21,18 @@ export const depositHandler = async (
 
   const rehydratedAccount = Account.rehydrate(accountId, events);
 
-  if (rehydratedAccount.userId !== userId) {
-    throw new AccountNotOwnedError(accountId, rehydratedAccount.userId);
+  if (rehydratedAccount.getUserId() !== userId) {
+    throw new AccountNotOwnedError(accountId, rehydratedAccount.getUserId());
   }
 
   const transactionId = randomUUID();
 
   rehydratedAccount.deposit(amountToDeposit, transactionId);
 
-  eventStore.append(
-    rehydratedAccount.id,
-    rehydratedAccount.uncommittedEvents,
-    rehydratedAccount.version,
+  await eventStore.append(
+    rehydratedAccount.getId(),
+    rehydratedAccount.getUncommittedEvents(),
+    rehydratedAccount.getVersion(),
   );
 
   return { transactionId };

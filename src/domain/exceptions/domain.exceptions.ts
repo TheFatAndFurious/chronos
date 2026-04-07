@@ -57,3 +57,10 @@ export class AccountNotOwnedError extends Error {
     this.name = "AccountNotOwnedError";
   }
 }
+
+export class TransferErrorException extends Error {
+  constructor(accountId: string) {
+    super(`No pending transfer currently in ${accountId}`);
+    this.name = "TransferErrorException";
+  }
+}

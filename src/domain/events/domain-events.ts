@@ -23,9 +23,27 @@ export type MoneyTransferredIn = {
   payload: { amount: number; sourceAccountId: string; transferId: string };
 };
 
+export type TransferOutInitiated = {
+  type: "TransferOutInitiated";
+  payload: { amount: number; targetAccountId: string; transferId: string };
+};
+
+export type TransferOutCancelled = {
+  type: "TransferOutCancelled";
+  payload: { amount: number; transferId: string };
+};
+
+export type TransferCompleted = {
+  type: "TransferCompleted";
+  payload: { transferId: string };
+};
+
 export type DomainEvent =
   | AccountCreated
   | MoneyDeposited
   | MoneyWithdrawn
   | MoneyTransferredOut
-  | MoneyTransferredIn;
+  | MoneyTransferredIn
+  | TransferOutInitiated
+  | TransferCompleted
+  | TransferOutCancelled;

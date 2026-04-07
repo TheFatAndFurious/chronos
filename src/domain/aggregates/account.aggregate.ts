@@ -2,11 +2,16 @@ import type {
   AccountCreated,
   DomainEvent,
   MoneyDeposited,
+  MoneyTransferredIn,
   MoneyWithdrawn,
+  TransferCompleted,
+  TransferOutCancelled,
+  TransferOutInitiated,
 } from "../events/domain-events";
 import {
   InsufficientFundsError,
   InvalidAmountError,
+  TransferErrorException,
 } from "../exceptions/domain.exceptions";
 
 export class Account {
@@ -16,6 +21,8 @@ export class Account {
   private _balance: number;
   private _version: number;
   private _uncommittedEvents: DomainEvent[];
+  // private _status: "active" | "closed" = "active";
+  private _pendingTransfers: Map<string, number>;
 
   private constructor() {
     this._id = "";
@@ -24,25 +31,30 @@ export class Account {
     this._balance = 0;
     this._version = 0;
     this._uncommittedEvents = [];
+    this._pendingTransfers = new Map();
   }
 
-  get id(): string {
+  getId(): string {
     return this._id;
   }
 
-  get userId(): string {
+  getUserId(): string {
     return this._userId;
   }
 
-  get accountName(): string {
+  getBalance(): number {
+    return this._balance;
+  }
+
+  getAccountName(): string {
     return this._accountName;
   }
 
-  get version(): number {
+  getVersion(): number {
     return this._version;
   }
 
-  get uncommittedEvents(): DomainEvent[] {
+  getUncommittedEvents(): DomainEvent[] {
     return [...this._uncommittedEvents];
   }
 
@@ -91,6 +103,75 @@ export class Account {
     this._uncommittedEvents.push(event);
   }
 
+  transferIn(
+    amount: number,
+    transferId: string,
+    sourceAccountId: string,
+  ): void {
+    if (amount <= 0 || !Number.isInteger(amount)) {
+      throw new InvalidAmountError(amount);
+    }
+
+    const event: MoneyTransferredIn = {
+      type: "MoneyTransferredIn",
+      payload: { amount, transferId, sourceAccountId },
+    };
+
+    this.apply(event);
+    this._uncommittedEvents.push(event);
+  }
+
+  initiateTransferOut(
+    amount: number,
+    transferId: string,
+    targetAccountId: string,
+  ): void {
+    console.log("🚀 ~ Account ~ initiateTransferOut ~ transferId:", transferId);
+    console.log("🚀 ~ Account ~ initiateTransferOut ~ amount:", amount);
+    if (amount <= 0) {
+      throw new InvalidAmountError(amount);
+    }
+
+    if (amount > this._balance) {
+      throw new InsufficientFundsError(this._id, amount, this._balance);
+    }
+
+    const event: TransferOutInitiated = {
+      type: "TransferOutInitiated",
+      payload: { amount, transferId, targetAccountId },
+    };
+
+    this.apply(event);
+    this._uncommittedEvents.push(event);
+  }
+
+  cancelTransferOut(transferId: string): void {
+    console.log(this._pendingTransfers);
+    if (!this._pendingTransfers.has(transferId)) {
+      throw new TransferErrorException(this._id);
+    }
+    const event: TransferOutCancelled = {
+      type: "TransferOutCancelled",
+      payload: {
+        amount: this._pendingTransfers.get(transferId)!,
+        transferId: transferId,
+      },
+    };
+    this.apply(event);
+    this._uncommittedEvents.push(event);
+  }
+
+  completeTransferOut(transferId: string): void {
+    const event: TransferCompleted = {
+      type: "TransferCompleted",
+      payload: {
+        transferId: transferId,
+      },
+    };
+    this.apply(event);
+    this._uncommittedEvents.push(event);
+  }
+
   withdraw(amount: number, transactionId: string): void {
     if (amount <= 0 || !Number.isInteger(amount)) {
       throw new InvalidAmountError(amount);
@@ -111,6 +192,20 @@ export class Account {
 
   private apply(event: DomainEvent): void {
     switch (event.type) {
+      case "TransferOutInitiated":
+        this._balance -= event.payload.amount;
+        this._pendingTransfers.set(
+          event.payload.transferId,
+          event.payload.amount,
+        );
+        break;
+      case "TransferOutCancelled":
+        this._balance += event.payload.amount;
+        this._pendingTransfers.delete(event.payload.transferId);
+        break;
+      case "TransferCompleted":
+        this._pendingTransfers.delete(event.payload.transferId);
+        break;
       case "AccountCreated":
         this._userId = event.payload.userId;
         this._accountName = event.payload.accountName;

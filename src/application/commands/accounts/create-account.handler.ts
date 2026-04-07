@@ -20,7 +20,7 @@ export const createAccountHandler = async (
 
   const account = Account.create(accountId, userId, accountName);
 
-  await eventStore.append(account.id, account.uncommittedEvents, 0);
+  await eventStore.append(account.getId(), account.getUncommittedEvents(), 0);
 
   return { accountId };
 };

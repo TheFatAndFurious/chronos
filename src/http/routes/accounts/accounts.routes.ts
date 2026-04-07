@@ -1,9 +1,11 @@
+import { createAccountHandler } from "@application/commands/accounts/create-account.handler";
 import { depositHandler } from "@application/commands/accounts/deposit.handler";
 import { withdrawHandler } from "@application/commands/accounts/withdraw.handler";
 import { getAccountByIdHandler } from "@application/queries/get-account.handler";
+import { TranferSaga } from "@application/sagas/transfer.saga";
+import { authMiddleware } from "@http/middleware/auth.middleware";
+import { eventStore } from "@infrastructure/persistence/event-store";
 import Elysia, { t } from "elysia";
-import { createAccountHandler } from "../../../application/commands/accounts/create-account.handler";
-import { authMiddleware } from "../../middleware/auth.middleware";
 
 export const accountsRoutes = new Elysia({ prefix: "/accounts" })
   .use(authMiddleware)
@@ -31,10 +33,10 @@ export const accountsRoutes = new Elysia({ prefix: "/accounts" })
     return result;
   })
   .post(
-    "/deposit",
-    async ({ body, set, user }) => {
+    "/:id/deposit",
+    async ({ body, set, user, params }) => {
       const transactionID = await depositHandler({
-        accountId: body.accountId,
+        accountId: params.id,
         amountToDeposit: body.amountToDeposit,
         userId: user.userId as string,
       });
@@ -52,12 +54,12 @@ export const accountsRoutes = new Elysia({ prefix: "/accounts" })
     },
   )
   .post(
-    "/withdraw",
-    async ({ body, set, user }) => {
+    "/:id/withdraw",
+    async ({ body, set, user, params }) => {
       const transactionId = await withdrawHandler({
-        accountId: body.accountId,
+        accountId: params.id,
         amountToWithdraw: body.amountToWithdraw,
-        userId: user.userId,
+        userId: user.userId as string,
       });
 
       set.status = 200;
@@ -67,6 +69,30 @@ export const accountsRoutes = new Elysia({ prefix: "/accounts" })
       body: t.Object({
         accountId: t.String(),
         amountToWithdraw: t.Number(),
+      }),
+    },
+  )
+  .post(
+    "/transfer",
+    async ({ body, set, user }) => {
+      const saga = new TranferSaga(eventStore);
+      const result = await saga.execute({
+        accountFrom: body.accountFrom,
+        accountTo: body.accountTo,
+        amountToTransfer: body.amountToTransfer,
+        userId: user.userId as string,
+      });
+
+      set.status = 200;
+      return result;
+    },
+    {
+      body: t.Object({
+        accountFrom: t.String(),
+        accountTo: t.String(),
+        amountToTransfer: t.Number({
+          exclusiveMinimum: 0,
+        }),
       }),
     },
   );

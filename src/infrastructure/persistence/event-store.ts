@@ -1,8 +1,21 @@
-import { eq, asc } from "drizzle-orm";
+import { DomainEvent } from "@domain/events/domain-events";
+import { and, asc, eq, gt } from "drizzle-orm";
+import { OptimisticLockError } from "../../domain/exceptions/domain.exceptions";
 import { db } from "./db";
 import { events } from "./schemas/events";
-import type { DomainEvent } from "../../domain/events/domain-events";
-import { OptimisticLockError } from "../../domain/exceptions/domain.exceptions";
+
+export interface IEventStore {
+  loadEvents(aggregateId: string): Promise<DomainEvent[]>;
+  append(
+    aggregateId: string,
+    newEvents: DomainEvent[],
+    expectedVersion: number,
+  ): Promise<void>;
+  getEventsFromVersion(
+    aggregateId: string,
+    version: number,
+  ): Promise<DomainEvent[]>;
+}
 
 function isUniqueViolation(error: unknown): boolean {
   if (error instanceof Error) {
@@ -19,16 +32,28 @@ function isUniqueViolation(error: unknown): boolean {
   return false;
 }
 
-export interface EventStore {
-  loadEvents(aggregateId: string): Promise<DomainEvent[]>;
-  append(
+export const eventStore = {
+  async getEventsFromVersion(
     aggregateId: string,
-    newEvents: DomainEvent[],
-    expectedVersion: number,
-  ): Promise<void>;
-}
+    versionNumber: number,
+  ): Promise<DomainEvent[]> {
+    const rows = await db
+      .select()
+      .from(events)
+      .where(
+        and(
+          eq(events.aggregateId, aggregateId),
+          gt(events.version, versionNumber),
+        ),
+      )
+      .orderBy(asc(events.version));
 
-export const eventStore: EventStore = {
+    return rows.map((row) => ({
+      type: row.type,
+      payload: row.payload,
+    })) as DomainEvent[];
+  },
+
   async loadEvents(aggregateId: string): Promise<DomainEvent[]> {
     const rows = await db
       .select()
