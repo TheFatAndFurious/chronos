@@ -2,6 +2,7 @@ import { createAccountHandler } from "@application/commands/accounts/create-acco
 import { depositHandler } from "@application/commands/accounts/deposit.handler";
 import { withdrawHandler } from "@application/commands/accounts/withdraw.handler";
 import { getAccountByIdHandler } from "@application/queries/get-account.handler";
+import { getAccountBalanceHandler } from "@application/queries/get-balance.handler";
 import { TranferSaga } from "@application/sagas/transfer.saga";
 import { authMiddleware } from "@http/middleware/auth.middleware";
 import { eventStore } from "@infrastructure/persistence/event-store";
@@ -9,6 +10,15 @@ import Elysia, { t } from "elysia";
 
 export const accountsRoutes = new Elysia({ prefix: "/accounts" })
   .use(authMiddleware)
+  .get("/:id/balance", async ({ user, set, params }) => {
+    const result = await getAccountBalanceHandler({
+      userId: user.userId as string,
+      accountId: params.id,
+    });
+
+    set.status = 200;
+    return result;
+  })
   .post(
     "/",
     async ({ body, user, set }) => {
