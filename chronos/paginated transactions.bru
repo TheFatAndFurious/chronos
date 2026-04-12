@@ -1,0 +1,19 @@
+meta {
+  name: paginated transactions
+  type: http
+  seq: 12
+}
+
+get {
+  url: http://localhost:3000/:id/transactions
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: 
+}
+
+settings {
+  encodeUrl: true
+}

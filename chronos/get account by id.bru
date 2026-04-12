@@ -7,11 +7,15 @@ meta {
 get {
   url: http://localhost:3000/accounts/:id
   body: none
-  auth: inherit
+  auth: bearer
 }
 
 params:path {
-  id: 
+  id: 9bb52902-5ffc-4e36-9a68-1112eb3978c8
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5YmI1MjkwMi01ZmZjLTRlMzYtOWE2OC0xMTEyZWIzOTc4YzgiLCJleHAiOjE3NzU1NjUzMjgsImlhdCI6MTc3NTU2NDQyOH0.1UaM5wZtoTXGK_68rX0yScj2wKNy8lc9TQQBgMGoWgE
 }
 
 settings {

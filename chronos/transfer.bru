@@ -6,8 +6,20 @@ meta {
 
 post {
   url: http://localhost:3000/accounts/transfer
-  body: none
-  auth: inherit
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5YmI1MjkwMi01ZmZjLTRlMzYtOWE2OC0xMTEyZWIzOTc4YzgiLCJleHAiOjE3NzU1OTczMDIsImlhdCI6MTc3NTU5NjQwMn0.c1gQ7jBQM_I11U1zuaakTe6lA9_pBnRN1WMEKCgX0eQ
+}
+
+body:json {
+  {
+    "accountFrom": "cc72eec6-33d8-4dc4-9507-db068c29e8ec",
+    "accountTo": "62e0c448-c1be-4c2e-ac6a-5596bb96d077",
+    "amountToTransfer": 500
+  }
 }
 
 settings {

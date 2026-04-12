@@ -7,7 +7,11 @@ meta {
 get {
   url: http://localhost:3000/transactions/test
   body: none
-  auth: inherit
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5NTE2OTQwMC04OThmLTQ5YjktYjkzNy1hOTIwYjJjZTAwY2UiLCJleHAiOjE3NzUwMTgzOTEsImlhdCI6MTc3NTAxNzQ5MX0.KAff3c0slY6KdtVI-iM2AEWmChExHsTpDPzB09kvXk8
 }
 
 settings {

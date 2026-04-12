@@ -5,9 +5,19 @@ meta {
 }
 
 post {
-  url: accounts
-  body: none
-  auth: inherit
+  url: http://localhost:3000/accounts/
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5YmI1MjkwMi01ZmZjLTRlMzYtOWE2OC0xMTEyZWIzOTc4YzgiLCJleHAiOjE3NzU1NzAyNzAsImlhdCI6MTc3NTU2OTM3MH0.4Pr-TkYRQDgwyWN4T7v2WWmsxitPaPZJ6t0JqSNCUD8
+}
+
+body:json {
+  {
+    "accountName": "compte de test"
+  }
 }
 
 settings {

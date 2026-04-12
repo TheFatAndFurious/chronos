@@ -5,9 +5,20 @@ meta {
 }
 
 post {
-  url: http://localhost:3000/account/deposit
-  body: none
-  auth: inherit
+  url: http://localhost:3000/accounts/deposit
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5YmI1MjkwMi01ZmZjLTRlMzYtOWE2OC0xMTEyZWIzOTc4YzgiLCJleHAiOjE3NzU1Njk2MDksImlhdCI6MTc3NTU2ODcwOX0.GzFgcA6TDB2ojRv1dQ6FOYxLlc2asp4XnI3PNSKECjE
+}
+
+body:json {
+  {
+    "accountId": "cc72eec6-33d8-4dc4-9507-db068c29e8ec",
+    "amountToDeposit": 1000
+  }
 }
 
 settings {

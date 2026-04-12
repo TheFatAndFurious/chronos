@@ -3,6 +3,7 @@ import { depositHandler } from "@application/commands/accounts/deposit.handler";
 import { withdrawHandler } from "@application/commands/accounts/withdraw.handler";
 import { getAccountByIdHandler } from "@application/queries/get-account.handler";
 import { getAccountBalanceHandler } from "@application/queries/get-balance.handler";
+import { getPaginatedTransactionsHandler } from "@application/queries/get-paginated-transactions.handler";
 import { TranferSaga } from "@application/sagas/transfer.saga";
 import { authMiddleware } from "@http/middleware/auth.middleware";
 import { eventStore } from "@infrastructure/persistence/event-store";
@@ -36,6 +37,28 @@ export const accountsRoutes = new Elysia({ prefix: "/accounts" })
       }),
     },
   )
+  .get("/:id/transactions", async ({ params, user, set }) => {
+    const result = await getPaginatedTransactionsHandler({
+      accountId: params.id,
+      userId: user.userId as string,
+    });
+    set.status = 200;
+    return result;
+  })
+  // .get(
+  //   "/:id/transactions&from=:from&to=:to",
+  //   async ({ params, user, set, query }) => {
+  //     const result = await getPaginatedTransactionsByDateRangeHandler({
+  //       accountId: params.id,
+  //       userId: user.userId as string,
+  //       from: new Date(query.from),
+  //       to: new Date(query.to),
+  //     });
+
+  //     set.status = 200;
+  //     return result;
+  //   },
+  // )
   .get("/:id", async ({ params, set }) => {
     const result = await getAccountByIdHandler({ accountId: params.id });
 
@@ -56,7 +79,6 @@ export const accountsRoutes = new Elysia({ prefix: "/accounts" })
     },
     {
       body: t.Object({
-        accountId: t.String(),
         amountToDeposit: t.Number({
           exclusiveMinimum: 0,
         }),
