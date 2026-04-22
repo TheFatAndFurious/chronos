@@ -7,13 +7,18 @@ meta {
 get {
   url: http://localhost:3000/accounts/:id/balance
   body: none
-  auth: inherit
+  auth: bearer
 }
 
 params:path {
-  id: 
+  id: f0a35c0d-99cf-4eb9-9073-f6e224f2b758
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5YmI1MjkwMi01ZmZjLTRlMzYtOWE2OC0xMTEyZWIzOTc4YzgiLCJleHAiOjE3NzYwMjQ0NDAsImlhdCI6MTc3NjAyMzU0MH0.mODiNS70Vxi9Mob7bvDFh5cB1BAaRkXkN9UDHbFLwBk
 }
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

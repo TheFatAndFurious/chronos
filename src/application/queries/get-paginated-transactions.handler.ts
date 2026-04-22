@@ -6,6 +6,7 @@ import { DomainEvent } from "./../../domain/events/domain-events";
 export interface GetPaginatedTransactionsHandler {
   accountId: string;
   userId: string;
+  beforeVersion?: number;
 }
 
 export interface GetPaginatedTransactionsResult {
@@ -15,14 +16,16 @@ export interface GetPaginatedTransactionsResult {
 export async function getPaginatedTransactionsHandler(
   query: GetPaginatedTransactionsHandler,
 ): Promise<GetPaginatedTransactionsResult> {
-  const events = await eventStore.loadEvents(query.accountId);
-  const rehydrtatedAccount = Account.rehydrate(query.accountId, events);
+  const events = await eventStore.loadEventsPaginated(
+    query.accountId,
+    query.beforeVersion,
+  );
 
-  if (rehydrtatedAccount.getUserId() !== query.userId) {
+  const rehydratedAccount = Account.rehydrate(query.accountId, events);
+
+  if (rehydratedAccount.getUserId() !== query.userId) {
     throw new AccountNotOwnedError(query.accountId, query.userId);
   }
 
-  const transactions = events.reverse().slice(0, 50);
-
-  return { paginatedEvents: transactions };
+  return { paginatedEvents: events };
 }

@@ -5,22 +5,26 @@ meta {
 }
 
 post {
-  url: http://localhost:3000/accounts/deposit
+  url: http://localhost:3000/accounts/:id/deposit
   body: json
   auth: bearer
 }
 
+params:path {
+  id: f0a35c0d-99cf-4eb9-9073-f6e224f2b758
+}
+
 auth:bearer {
-  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5YmI1MjkwMi01ZmZjLTRlMzYtOWE2OC0xMTEyZWIzOTc4YzgiLCJleHAiOjE3NzU1Njk2MDksImlhdCI6MTc3NTU2ODcwOX0.GzFgcA6TDB2ojRv1dQ6FOYxLlc2asp4XnI3PNSKECjE
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5YmI1MjkwMi01ZmZjLTRlMzYtOWE2OC0xMTEyZWIzOTc4YzgiLCJleHAiOjE3NzYwMjY2MTcsImlhdCI6MTc3NjAyNTcxN30.q22jlfhmXD9NYWHiobpbRDqDYt9D7Ha4uUmHTg2-0ro
 }
 
 body:json {
   {
-    "accountId": "cc72eec6-33d8-4dc4-9507-db068c29e8ec",
     "amountToDeposit": 1000
   }
 }
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

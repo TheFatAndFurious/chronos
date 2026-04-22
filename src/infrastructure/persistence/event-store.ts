@@ -1,5 +1,5 @@
 import { DomainEvent } from "@domain/events/domain-events";
-import { and, asc, eq, gt } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, lt, lte } from "drizzle-orm";
 import { OptimisticLockError } from "../../domain/exceptions/domain.exceptions";
 import { db } from "./db";
 import { events } from "./schemas/events";
@@ -64,6 +64,54 @@ export const eventStore = {
     return rows.map((row) => ({
       type: row.type,
       payload: row.payload,
+    })) as DomainEvent[];
+  },
+
+  async loadEventsByDate(
+    aggregateId: string,
+    from: Date,
+    to: Date,
+  ): Promise<DomainEvent[]> {
+    const rows = await db
+      .select()
+      .from(events)
+      .where(
+        and(
+          eq(events.aggregateId, aggregateId),
+          lte(events.createdAt, to),
+          gte(events.createdAt, from),
+        ),
+      );
+
+    return rows.map((row) => ({
+      type: row.type,
+      payload: row.payload,
+      version: row.version,
+    })) as DomainEvent[];
+  },
+
+  async loadEventsPaginated(
+    aggregateId: string,
+    beforeVersion?: number,
+  ): Promise<DomainEvent[]> {
+    const whereCondition = beforeVersion
+      ? and(
+          eq(events.aggregateId, aggregateId),
+          lt(events.version, beforeVersion),
+        )
+      : eq(events.aggregateId, aggregateId);
+
+    const rows = await db
+      .select()
+      .from(events)
+      .where(whereCondition)
+      .limit(50)
+      .orderBy(desc(events.version));
+
+    return rows.map((row) => ({
+      type: row.type,
+      payload: row.payload,
+      version: row.version,
     })) as DomainEvent[];
   },
 

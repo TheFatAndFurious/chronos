@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
-const ACCESS_TTL_SECONDS = Number(process.env.JWT_ACCESS_TTL) || 900; // 15 min
+const ACCESS_TTL_SECONDS = Number(process.env.JWT_ACCESS_TTL) || 9000; // 15 min
 const REFRESH_TTL_SECONDS = Number(process.env.JWT_REFRESH_TTL) || 604800; // 7 days
 
 export type AccessTokenPayload = {

@@ -37,28 +37,23 @@ export const accountsRoutes = new Elysia({ prefix: "/accounts" })
       }),
     },
   )
-  .get("/:id/transactions", async ({ params, user, set }) => {
-    const result = await getPaginatedTransactionsHandler({
-      accountId: params.id,
-      userId: user.userId as string,
-    });
-    set.status = 200;
-    return result;
-  })
-  // .get(
-  //   "/:id/transactions&from=:from&to=:to",
-  //   async ({ params, user, set, query }) => {
-  //     const result = await getPaginatedTransactionsByDateRangeHandler({
-  //       accountId: params.id,
-  //       userId: user.userId as string,
-  //       from: new Date(query.from),
-  //       to: new Date(query.to),
-  //     });
-
-  //     set.status = 200;
-  //     return result;
-  //   },
-  // )
+  .get(
+    "/:id/transactions",
+    async ({ params, user, set, query }) => {
+      const result = await getPaginatedTransactionsHandler({
+        accountId: params.id,
+        beforeVersion: query.before,
+        userId: user.userId as string,
+      });
+      set.status = 200;
+      return result;
+    },
+    {
+      query: t.Object({
+        before: t.Optional(t.Numeric()),
+      }),
+    },
+  )
   .get("/:id", async ({ params, set }) => {
     const result = await getAccountByIdHandler({ accountId: params.id });
 
