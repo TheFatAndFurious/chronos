@@ -14,7 +14,7 @@ export interface GetTransactionsByDateRangeResult {
   transactions: DomainEvent[];
 }
 
-async function getTransactionsByDateRangeHandler(
+export async function getTransactionsByDateRangeHandler(
   query: GetTransactionsByDateRangeQuery,
 ): Promise<DomainEvent[]> {
   const events = await eventStore.loadEventsByDate(

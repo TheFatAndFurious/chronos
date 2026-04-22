@@ -87,6 +87,7 @@ export const eventStore = {
       type: row.type,
       payload: row.payload,
       version: row.version,
+      date: row.createdAt,
     })) as DomainEvent[];
   },
 

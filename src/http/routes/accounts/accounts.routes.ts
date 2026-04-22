@@ -4,6 +4,7 @@ import { withdrawHandler } from "@application/commands/accounts/withdraw.handler
 import { getAccountByIdHandler } from "@application/queries/get-account.handler";
 import { getAccountBalanceHandler } from "@application/queries/get-balance.handler";
 import { getPaginatedTransactionsHandler } from "@application/queries/get-paginated-transactions.handler";
+import { getTransactionsByDateRangeHandler } from "@application/queries/get-transactions-by-date-range";
 import { TranferSaga } from "@application/sagas/transfer.saga";
 import { authMiddleware } from "@http/middleware/auth.middleware";
 import { eventStore } from "@infrastructure/persistence/event-store";
@@ -51,6 +52,28 @@ export const accountsRoutes = new Elysia({ prefix: "/accounts" })
     {
       query: t.Object({
         before: t.Optional(t.Numeric()),
+      }),
+    },
+  )
+  .get(
+    "/:id/transactions",
+    async ({ params, user, set, query }) => {
+      const convertedStartDate = new Date(query.startDate);
+      const convertedEndDate = new Date(query.endDate);
+
+      const result = await getTransactionsByDateRangeHandler({
+        startDate: convertedStartDate,
+        endDate: convertedEndDate,
+        userId: user.userId as string,
+        aggregateId: params.id,
+      });
+      set.status = 200;
+      return result;
+    },
+    {
+      query: t.Object({
+        startDate: t.String(),
+        endDate: t.String(),
       }),
     },
   )
