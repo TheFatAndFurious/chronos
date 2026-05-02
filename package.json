@@ -8,6 +8,7 @@
   "dependencies": {
     "@elysiajs/eden": "^1.4.8",
     "@elysiajs/jwt": "^1.4.1",
+    "@logtape/logtape": "^2.0.5",
     "@sinclair/typebox": "^0.34.49",
     "drizzle-kit": "^0.31.10",
     "drizzle-orm": "^0.45.2",

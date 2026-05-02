@@ -1,6 +1,7 @@
 import { Account } from "@domain/aggregates/account.aggregate";
 import { AccountNotOwnedError } from "@domain/exceptions/domain.exceptions";
-import { eventStore } from "@infrastructure/persistence/event-store";
+import { CacheService } from "@infrastructure/cache/redis-service";
+import { IEventStore } from "@infrastructure/persistence/event-store";
 import { randomUUID } from "node:crypto";
 
 export type DepositCommand = {
@@ -13,27 +14,37 @@ export type DepositResult = {
   transactionId: string;
 };
 
-export const depositHandler = async (
-  command: DepositCommand,
-): Promise<DepositResult> => {
-  const { accountId, amountToDeposit, userId } = command;
-  const events = await eventStore.loadEvents(accountId);
+export class DepositHandler {
+  constructor(
+    private readonly cacheService: CacheService,
+    private readonly eventStore: IEventStore,
+  ) {}
 
-  const rehydratedAccount = Account.rehydrate(accountId, events);
+  async execute(
+    command: DepositCommand,
+    cacheService: CacheService,
+  ): Promise<DepositResult> {
+    const { accountId, amountToDeposit, userId } = command;
+    const events = await this.eventStore.loadEvents(accountId);
 
-  if (rehydratedAccount.getUserId() !== userId) {
-    throw new AccountNotOwnedError(accountId, rehydratedAccount.getUserId());
+    const rehydratedAccount = Account.rehydrate(accountId, events);
+
+    if (rehydratedAccount.getUserId() !== userId) {
+      throw new AccountNotOwnedError(accountId, rehydratedAccount.getUserId());
+    }
+
+    const transactionId = randomUUID();
+
+    rehydratedAccount.deposit(amountToDeposit, transactionId);
+
+    await this.eventStore.append(
+      rehydratedAccount.getId(),
+      rehydratedAccount.getUncommittedEvents(),
+      rehydratedAccount.getVersion(),
+    );
+
+    await this.cacheService.delete(`balance:${accountId}`);
+
+    return { transactionId };
   }
-
-  const transactionId = randomUUID();
-
-  rehydratedAccount.deposit(amountToDeposit, transactionId);
-
-  await eventStore.append(
-    rehydratedAccount.getId(),
-    rehydratedAccount.getUncommittedEvents(),
-    rehydratedAccount.getVersion(),
-  );
-
-  return { transactionId };
-};
+}

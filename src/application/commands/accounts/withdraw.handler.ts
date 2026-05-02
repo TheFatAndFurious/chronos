@@ -1,6 +1,7 @@
 import { Account } from "@domain/aggregates/account.aggregate";
 import { AccountNotOwnedError } from "@domain/exceptions/domain.exceptions";
-import { eventStore } from "@infrastructure/persistence/event-store";
+import { CacheService } from "@infrastructure/cache/redis-service";
+import { IEventStore } from "@infrastructure/persistence/event-store";
 import { randomUUID } from "node:crypto";
 
 export type WithdrawCommand = {
@@ -13,28 +14,35 @@ export type WithdrawResult = {
   transactionId: string;
 };
 
-export const withdrawHandler = async (
-  command: WithdrawCommand,
-): Promise<WithdrawResult> => {
-  const { accountId, amountToWithdraw, userId } = command;
+export class WithdrawHandler {
+  constructor(
+    private readonly eventStore: IEventStore,
+    private readonly cacheService: CacheService,
+  ) {}
 
-  const events = await eventStore.loadEvents(accountId);
+  async execute(command: WithdrawCommand): Promise<WithdrawResult> {
+    const { accountId, amountToWithdraw, userId } = command;
 
-  const rehydratedAccount = Account.rehydrate(accountId, events);
+    const events = await this.eventStore.loadEvents(accountId);
 
-  if (rehydratedAccount.getUserId() !== userId) {
-    throw new AccountNotOwnedError(accountId, rehydratedAccount.getUserId());
+    const rehydratedAccount = Account.rehydrate(accountId, events);
+
+    if (rehydratedAccount.getUserId() !== userId) {
+      throw new AccountNotOwnedError(accountId, rehydratedAccount.getUserId());
+    }
+
+    const transactionId = randomUUID();
+
+    rehydratedAccount.withdraw(amountToWithdraw, transactionId);
+
+    await this.eventStore.append(
+      rehydratedAccount.getId(),
+      rehydratedAccount.getUncommittedEvents(),
+      rehydratedAccount.getVersion(),
+    );
+
+    await this.cacheService.delete(`balance:${accountId}`);
+
+    return { transactionId };
   }
-
-  const transactionId = randomUUID();
-
-  rehydratedAccount.withdraw(amountToWithdraw, transactionId);
-
-  await eventStore.append(
-    rehydratedAccount.getId(),
-    rehydratedAccount.getUncommittedEvents(),
-    rehydratedAccount.getVersion(),
-  );
-
-  return { transactionId };
-};
+}

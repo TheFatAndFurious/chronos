@@ -5,15 +5,25 @@ meta {
 }
 
 get {
-  url: http://localhost:3000/accounts/:id/transactions
+  url: http://localhost:3000/accounts/:id/transactions?startDate="2026-01-01"&endDate="2026-12-12"
   body: none
-  auth: inherit
+  auth: bearer
+}
+
+params:query {
+  startDate: "2026-01-01"
+  endDate: "2026-12-12"
 }
 
 params:path {
-  id: 
+  id: f0a35c0d-99cf-4eb9-9073-f6e224f2b758
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5YmI1MjkwMi01ZmZjLTRlMzYtOWE2OC0xMTEyZWIzOTc4YzgiLCJleHAiOjE3NzY4OTYwMzUsImlhdCI6MTc3Njg4NzAzNX0.MwknNq5kKI0i0QS3R7H8QPmDlZN9Zvs4PXf2MAJXSZM
 }
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

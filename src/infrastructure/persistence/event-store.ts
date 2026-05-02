@@ -15,6 +15,10 @@ export interface IEventStore {
     aggregateId: string,
     version: number,
   ): Promise<DomainEvent[]>;
+  loadEventsPaginated(
+    aggregateId: string,
+    beforeVersion?: number,
+  ): Promise<DomainEvent[]>;
 }
 
 function isUniqueViolation(error: unknown): boolean {
