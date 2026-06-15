@@ -41,7 +41,7 @@ export class WithdrawHandler {
       rehydratedAccount.getVersion(),
     );
 
-    await this.cacheService.delete(`balance:${accountId}`);
+    await this.cacheService.invalidateAccount(`balance:${accountId}`);
 
     return { transactionId };
   }

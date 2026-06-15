@@ -69,10 +69,10 @@ export const accountsRoutes = (cacheService: CacheService) => {
       },
     )
     .get(
-      "/:id/transactions",
+      "/:id/transactions/range",
       async ({ params, user, set, query }) => {
-        const convertedStartDate = new Date(query.startDate);
-        const convertedEndDate = new Date(query.endDate);
+        const convertedStartDate = new Date(query.from);
+        const convertedEndDate = new Date(query.to);
 
         const result = await getTransactionsByDateRangeHandler({
           startDate: convertedStartDate,
@@ -85,8 +85,8 @@ export const accountsRoutes = (cacheService: CacheService) => {
       },
       {
         query: t.Object({
-          startDate: t.String(),
-          endDate: t.String(),
+          from: t.String(),
+          to: t.String(),
         }),
       },
     )
@@ -99,14 +99,11 @@ export const accountsRoutes = (cacheService: CacheService) => {
     .post(
       "/:id/deposit",
       async ({ body, set, user, params }) => {
-        const transactionID = await depositHandler.execute(
-          {
-            accountId: params.id,
-            amountToDeposit: body.amountToDeposit,
-            userId: user.userId as string,
-          },
-          cacheService,
-        );
+        const transactionID = await depositHandler.execute({
+          accountId: params.id,
+          amountToDeposit: body.amountToDeposit,
+          userId: user.userId as string,
+        });
 
         set.status = 200;
         return transactionID;
@@ -141,7 +138,7 @@ export const accountsRoutes = (cacheService: CacheService) => {
     .post(
       "/transfer",
       async ({ body, set, user }) => {
-        const saga = new TranferSaga(eventStore);
+        const saga = new TranferSaga(eventStore, cacheService);
         const result = await saga.execute({
           accountFrom: body.accountFrom,
           accountTo: body.accountTo,

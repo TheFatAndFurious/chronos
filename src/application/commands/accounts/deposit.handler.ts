@@ -1,6 +1,6 @@
 import { Account } from "@domain/aggregates/account.aggregate";
 import { AccountNotOwnedError } from "@domain/exceptions/domain.exceptions";
-import { CacheService } from "@infrastructure/cache/redis-service";
+import { CacheKeys, CacheService } from "@infrastructure/cache/redis-service";
 import { IEventStore } from "@infrastructure/persistence/event-store";
 import { randomUUID } from "node:crypto";
 
@@ -20,10 +20,7 @@ export class DepositHandler {
     private readonly eventStore: IEventStore,
   ) {}
 
-  async execute(
-    command: DepositCommand,
-    cacheService: CacheService,
-  ): Promise<DepositResult> {
+  async execute(command: DepositCommand): Promise<DepositResult> {
     const { accountId, amountToDeposit, userId } = command;
     const events = await this.eventStore.loadEvents(accountId);
 
@@ -43,7 +40,7 @@ export class DepositHandler {
       rehydratedAccount.getVersion(),
     );
 
-    await this.cacheService.delete(`balance:${accountId}`);
+    await this.cacheService.invalidateAccount(CacheKeys.balance(accountId));
 
     return { transactionId };
   }

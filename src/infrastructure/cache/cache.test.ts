@@ -65,7 +65,7 @@ describe("RedisCache", () => {
 
     expect(result).toBe(value);
 
-    await cache.delete(key);
+    await cache.invalidateAccount(key);
 
     const deletedResult = await cache.get<number>(key);
 

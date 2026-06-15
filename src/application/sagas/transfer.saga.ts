@@ -4,10 +4,14 @@ import {
 } from "@application/commands/accounts/transfer.handler";
 import { Account } from "@domain/aggregates/account.aggregate";
 import { TransferErrorException } from "@domain/exceptions/domain.exceptions";
+import { CacheService } from "@infrastructure/cache/redis-service";
 import { IEventStore } from "@infrastructure/persistence/event-store";
 import { randomUUID } from "node:crypto";
 export class TranferSaga {
-  constructor(private readonly eventStore: IEventStore) {}
+  constructor(
+    private readonly eventStore: IEventStore,
+    private readonly cacheService: CacheService,
+  ) {}
 
   async execute(command: TransferCommand): Promise<TransferResult> {
     const transactionId = randomUUID();
@@ -49,7 +53,10 @@ export class TranferSaga {
       console.error(`COULDNT COMPLETE TRANSFER`, error);
       throw new TransferErrorException(accountFrom);
     }
-
+    await Promise.all([
+      this.cacheService.invalidateAccount(accountFrom),
+      this.cacheService.invalidateAccount(accountTo),
+    ]);
     return { transactionId };
   }
 }

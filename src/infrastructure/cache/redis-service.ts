@@ -6,6 +6,13 @@ export interface SetParamsCache<T> {
   ttlSeconds?: number;
 }
 
+export const CacheKeys = {
+  balance: (accountId: string) => `balance:${accountId}`,
+  transactions: (accountId: string, page: number) =>
+    `transactions:${accountId}:${page}`,
+  transactionsPattern: (accountId: string) => `transactions:${accountId}:*`,
+};
+
 export class CacheService {
   constructor(private readonly redis: RedisClient) {}
 
@@ -36,8 +43,29 @@ export class CacheService {
     return JSON.parse(value) as T;
   }
 
-  async delete(key: string): Promise<void> {
-    await this.redis.del(key);
-    console.log("[ CACHE DELETION ] ");
+  async invalidateAccount(accountId: string): Promise<void> {
+    await Promise.all([
+      this._deleteByPattern(CacheKeys.transactionsPattern(accountId)),
+      this.redis.del(CacheKeys.balance(accountId)),
+    ]);
+  }
+
+  private async _deleteByPattern(pattern: string): Promise<void> {
+    let cursor = "0";
+
+    do {
+      const [nextCursor, keys] = await this.redis.scan(
+        cursor,
+        "MATCH",
+        pattern,
+        "COUNT",
+        100,
+      );
+      cursor = nextCursor;
+
+      if (keys.length > 0) {
+        await this.redis.del(...keys);
+      }
+    } while (cursor !== "0");
   }
 }
