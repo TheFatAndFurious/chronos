@@ -32,7 +32,7 @@ export class CacheService {
 
   async get<T>(key: string): Promise<T | null> {
     const value = await this.redis.get(key);
-
+    console.log("Cache value is: ", value)
     if (value === null) {
       console.log("[ CACHE MISS ] ");
 
@@ -45,6 +45,7 @@ export class CacheService {
 
   async invalidateAccount(accountId: string): Promise<void> {
     await Promise.all([
+        console.log(CacheKeys.transactionsPattern(accountId)),
       this._deleteByPattern(CacheKeys.transactionsPattern(accountId)),
       this.redis.del(CacheKeys.balance(accountId)),
     ]);
@@ -54,13 +55,13 @@ export class CacheService {
     let cursor = "0";
 
     do {
-      const [nextCursor, keys] = await this.redis.scan(
+      const [nextCursor, keys] = (await this.redis.send("SCAN", [
         cursor,
         "MATCH",
         pattern,
         "COUNT",
-        100,
-      );
+        "100",
+      ])) as [string, string[]];
       cursor = nextCursor;
 
       if (keys.length > 0) {

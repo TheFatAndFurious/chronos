@@ -4,7 +4,7 @@ import jwt from "@elysiajs/jwt";
 import { jwtConfig } from "@infrastructure/auth/jwt.service";
 import Elysia, { t, validationDetail } from "elysia";
 
-export const authRoutes = new Elysia({ prefix: "/register" })
+export const registerRoute = new Elysia({ prefix: "/register" })
   .use(jwt({ name: "jwt", ...jwtConfig }))
   .post(
     "/",

@@ -17,7 +17,15 @@ export class RedisRateLimiterAdapter implements IRateLimiter {
     }
 
     async checkAndIncrement(key: string, limit: number, windowSeconds: number): Promise<RateLimitResult> {
-        const [current, ttl] = await this.redis.eval(RATE_LIMITER_LUA_SCRIPT, [key], [limit], [windowSeconds]) as [number, number]
+
+        const result = await this.redis.send('EVAL', [
+            RATE_LIMITER_LUA_SCRIPT,
+            '1',           // numkeys — en string
+            key,           // KEYS[1]
+            String(windowSeconds)  // ARGV[1]
+        ])
+
+        const [current, ttl] = result
 
         return {
             allowed: current <= limit,

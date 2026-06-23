@@ -2,6 +2,7 @@ import { InvalidCredentialsError } from "@domain/exceptions/domain.exceptions";
 import { jwtService } from "@infrastructure/auth/jwt.service";
 import { tokenRepository } from "@infrastructure/persistence/repository/token.repository";
 import { userRepository } from "@infrastructure/persistence/repository/user.repository";
+import {IRateLimiter} from "@application/ports/rate-limiter.port";
 
 export type LoginCommand = {
   email: string;
@@ -13,9 +14,14 @@ export type LoginResult = {
   refreshToken: string;
 };
 
-export async function loginHandler(
-  command: LoginCommand,
-): Promise<LoginResult> {
+
+export class LoginHAndler{
+  constructor(
+      private readonly  rateLimiter: IRateLimiter,
+  ){}
+async execute(command: LoginCommand): Promise<LoginResult> {
+    await this.rateLimiter.checkAndIncrement('login', 10, 60);
+
   const { email, password } = command;
 
   // 1. Find user by email
@@ -48,5 +54,9 @@ export async function loginHandler(
     userId: user.id,
     refreshToken,
   };
+
 }
+
+}
+
 export { InvalidCredentialsError };

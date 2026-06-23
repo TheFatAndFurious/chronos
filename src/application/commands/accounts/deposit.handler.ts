@@ -40,7 +40,7 @@ export class DepositHandler {
       rehydratedAccount.getVersion(),
     );
 
-    await this.cacheService.invalidateAccount(CacheKeys.balance(accountId));
+    await this.cacheService.invalidateAccount(accountId);
 
     return { transactionId };
   }

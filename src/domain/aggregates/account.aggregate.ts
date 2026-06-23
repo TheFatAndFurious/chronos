@@ -126,8 +126,6 @@ export class Account {
     transferId: string,
     targetAccountId: string,
   ): void {
-    console.log("🚀 ~ Account ~ initiateTransferOut ~ transferId:", transferId);
-    console.log("🚀 ~ Account ~ initiateTransferOut ~ amount:", amount);
     if (amount <= 0) {
       throw new InvalidAmountError(amount);
     }

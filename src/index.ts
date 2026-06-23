@@ -1,4 +1,5 @@
 import { CacheService } from "@infrastructure/cache/redis-service";
+import { RedisRateLimiterAdapter } from "@infrastructure/rate-limiter/redis-rate-limiter.adapter";
 import { SnapshotWorker } from "@infrastructure/workers/snapshot.worker";
 import { RedisClient } from "bun";
 import postgres from "postgres";
@@ -24,8 +25,9 @@ const redisUrl = process.env.REDIS_URL || "redis://localhost:6380";
 
 const redis = new RedisClient(redisUrl);
 const cacheService = new CacheService(redis);
+const rateLimiter = new RedisRateLimiterAdapter(redis);
 
-const app = createApp(cacheService);
+const app = createApp(cacheService, rateLimiter);
 app.listen(3000);
 console.log(`REDIS UP AND RUNNING ON PORT ${databaseUrl} - WE GUCCI`);
 
